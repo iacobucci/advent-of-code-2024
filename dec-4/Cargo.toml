@@ -1,0 +1,11 @@
+[package]
+name = "dec-4"
+version = "0.1.0"
+edition = "2021"
+default-run = "main"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[dependencies]
