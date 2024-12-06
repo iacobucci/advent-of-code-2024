@@ -21,7 +21,7 @@ fn main() {
 		.find_map(|(y, row)| {
 			// there we iterate over the columns of each row, returning the result of the first match
 			row.iter()
-				// checking if the charater is '^', position returns an Option<usize>
+				// checking if the character is '^', position returns an Option<usize>
 				.position(|&c| c == '^')
 				// we map the Option<usize> to an Option<(usize, usize)> with the y value that we have still in scope
 				.map(|x| (x as i32, y as i32))
@@ -78,9 +78,19 @@ fn main() {
 
 		// put the 'O' in the matrix
 		matrix[o_pos.1 as usize][o_pos.0 as usize] = 'O';
-		let mut right_turns_at_an_o = 0;
+
+		let mut i = 0;
 
 		loop {
+			i += 1;
+
+			if let Some(element) = get_matrix_element(&mut matrix, next_pos(pos, &dir)) {
+				if *element == '#' || *element == 'O' {
+					dir = turn_right(&dir);
+					continue;
+				}
+			}
+
 			match dir {
 				DIR::UP => {
 					if ((pos.1) as i32) - 1 < 0 {
@@ -108,19 +118,9 @@ fn main() {
 				}
 			}
 
-			if let Some(element) = get_matrix_element(&mut matrix, next_pos(pos, &dir)) {
-				if *element == '#' {
-					dir = turn_right(&dir);
-				}
-				if *element == 'O' {
-					dir = turn_right(&dir);
-					right_turns_at_an_o += 1;
-
-					// given that you can only bump in the O in 4 different directions, each of those direction might be a faux positive, and lead to a non looping path. if we check that the guard bumps into the O at least 5 times, we are sure that she will loop
-					if right_turns_at_an_o == 5 {
-						return true;
-					}
-				}
+			// if the guard has walked at least twice the matrix, its sufficient to say that it loops
+			if i > matrix.len() * matrix[0].len() * 2 {
+				return true;
 			}
 		}
 
@@ -148,19 +148,30 @@ fn main() {
 
 	for y in 0..matrix.len() {
 		for x in 0..matrix[0].len() {
-			if !(x == initial_pos.0 as usize && y == initial_pos.1 as usize) {
-				print!(
-					"checking {} of {} ({}%)",
-					x + y * matrix[0].len(),
-					total_to_check,
-					(x + y * matrix[0].len()) as f32 / total_to_check as f32 * 100.0
-				);
-				if loops(&matrix, initial_pos, DIR::UP, (x as i32, y as i32)) {
-					sum += 1;
-					print!(": true\n");
-				} else {
-					print!(": false\n");
-				}
+			print!(
+				"checking ({},{}): {} of {} ({}%)",
+				x,
+				y,
+				x + y * matrix[0].len(),
+				total_to_check,
+				(x + y * matrix[0].len()) as f32 / total_to_check as f32 * 100.0
+			);
+
+			if matrix[y][x] == '#' {
+				print!(": false\n");
+				continue;
+			}
+
+			if x == initial_pos.0 as usize && y == initial_pos.1 as usize {
+				print!(": false\n");
+				continue;
+			}
+
+			if loops(&matrix, initial_pos, DIR::UP, (x as i32, y as i32)) {
+				sum += 1;
+				print!(": true\n");
+			} else {
+				print!(": false\n");
 			}
 		}
 	}

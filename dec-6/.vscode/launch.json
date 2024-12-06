@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Crate",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/target/debug/dec-6",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "preLaunchTask": "cargo build"
+    }
+  ],
+}
