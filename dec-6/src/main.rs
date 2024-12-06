@@ -6,14 +6,14 @@ enum DIR {
 }
 
 fn main() {
-	let mut matrix: Vec<Vec<char>>;
+	let matrix: Vec<Vec<char>>;
 	let input = std::fs::read_to_string("input").unwrap();
 
 	// this worked also on dec-4
 	matrix = input.lines().map(|line| line.chars().collect()).collect();
 
 	// initial position of '^'
-	let mut pos = matrix
+	let pos = matrix
 		.iter()
 		// with enumerate we make the iteration over the rows keeping an index
 		.enumerate()
@@ -71,7 +71,7 @@ fn main() {
 		o_pos: (i32, i32),
 	) -> bool {
 		// no recursive function, so we can shadow the loops function reference
-		let mut loops = false;
+		let loops = false;
 		let mut pos = starting_pos.clone();
 		let mut matrix = starting_matrix.clone();
 		let mut dir = starting_dir;
@@ -118,14 +118,6 @@ fn main() {
 
 					// given that you can only bump in the O in 4 different directions, each of those direction might be a faux positive, and lead to a non looping path. if we check that the guard bumps into the O at least 5 times, we are sure that she will loop
 					if right_turns_at_an_o == 5 {
-						// for y in 0..matrix.len() {
-						// 	for x in 0..matrix[y].len() {
-						// 		print!("{}", matrix[y][x]);
-						// 	}
-						// 	println!();
-						// }
-						// println!();
-
 						return true;
 					}
 				}
@@ -152,11 +144,22 @@ fn main() {
 
 	let mut sum = 0;
 
+	let total_to_check = matrix.len() * matrix[0].len() - 1;
+
 	for y in 0..matrix.len() {
 		for x in 0..matrix[0].len() {
 			if !(x == initial_pos.0 as usize && y == initial_pos.1 as usize) {
+				print!(
+					"checking {} of {} ({}%)",
+					x + y * matrix[0].len(),
+					total_to_check,
+					(x + y * matrix[0].len()) as f32 / total_to_check as f32 * 100.0
+				);
 				if loops(&matrix, initial_pos, DIR::UP, (x as i32, y as i32)) {
 					sum += 1;
+					print!(": true\n");
+				} else {
+					print!(": false\n");
 				}
 			}
 		}
