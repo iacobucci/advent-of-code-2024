@@ -7,7 +7,7 @@ enum DIR {
 
 fn main() {
 	let mut matrix: Vec<Vec<char>>;
-	let input = std::fs::read_to_string("input.test").unwrap();
+	let input = std::fs::read_to_string("input").unwrap();
 
 	// this worked also on dec-4
 	matrix = input.lines().map(|line| line.chars().collect()).collect();
@@ -64,7 +64,6 @@ fn main() {
 		}
 	}
 
-	// to check if adding an 'O' to a o_pos makes the guard loop, we have to check if the guard will find herself back to initial_pos and dir = UP
 	fn loops(
 		starting_matrix: &Vec<Vec<char>>,
 		starting_pos: (i32, i32),
@@ -79,6 +78,7 @@ fn main() {
 
 		// put the 'O' in the matrix
 		matrix[o_pos.1 as usize][o_pos.0 as usize] = 'O';
+		let mut right_turns_at_an_o = 0;
 
 		loop {
 			match dir {
@@ -86,45 +86,48 @@ fn main() {
 					if ((pos.1) as i32) - 1 < 0 {
 						break;
 					}
-					pos.1 -= 1;
+					pos = next_pos(pos, &dir);
 				}
 				DIR::DOWN => {
 					if ((pos.1) as i32) + 1 >= matrix.len() as i32 {
 						break;
 					}
-					pos.1 += 1;
+					pos = next_pos(pos, &dir);
 				}
 				DIR::LEFT => {
 					if ((pos.0) as i32) - 1 < 0 {
 						break;
 					}
-					pos.0 -= 1;
+					pos = next_pos(pos, &dir);
 				}
 				DIR::RIGHT => {
 					if ((pos.0) as i32) + 1 >= matrix[0].len() as i32 {
 						break;
 					}
-					pos.0 += 1;
+					pos = next_pos(pos, &dir);
 				}
-			}
-
-			if (pos.0, pos.1) == starting_pos && matches!(&dir, starting_dir) {
-				loops = true;
-
-				for y in 0..matrix.len() {
-					for x in 0..matrix[y].len() {
-						print!("{}", matrix[y][x]);
-					}
-					println!();
-				}
-				println!();
-
-				break;
 			}
 
 			if let Some(element) = get_matrix_element(&mut matrix, next_pos(pos, &dir)) {
-				if *element == '#' || *element == 'O' {
+				if *element == '#' {
 					dir = turn_right(&dir);
+				}
+				if *element == 'O' {
+					dir = turn_right(&dir);
+					right_turns_at_an_o += 1;
+
+					// given that you can only bump in the O in 4 different directions, each of those direction might be a faux positive, and lead to a non looping path. if we check that the guard bumps into the O at least 5 times, we are sure that she will loop
+					if right_turns_at_an_o == 5 {
+						// for y in 0..matrix.len() {
+						// 	for x in 0..matrix[y].len() {
+						// 		print!("{}", matrix[y][x]);
+						// 	}
+						// 	println!();
+						// }
+						// println!();
+
+						return true;
+					}
 				}
 			}
 		}
@@ -151,7 +154,7 @@ fn main() {
 
 	for y in 0..matrix.len() {
 		for x in 0..matrix[0].len() {
-			if !(x != initial_pos.0 as usize && y != initial_pos.1 as usize) {
+			if !(x == initial_pos.0 as usize && y == initial_pos.1 as usize) {
 				if loops(&matrix, initial_pos, DIR::UP, (x as i32, y as i32)) {
 					sum += 1;
 				}
