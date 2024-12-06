@@ -9,15 +9,15 @@ fn main() {
 
 	let input = std::fs::read_to_string("input").unwrap();
 
-	let mut readingUpdates = false;
+	let mut reading_updates = false;
 
 	for line in input.lines() {
 		if line.is_empty() {
-			readingUpdates = true;
+			reading_updates = true;
 			continue;
 		}
 
-		if !readingUpdates {
+		if !reading_updates {
 			let split = line.split("|").collect::<Vec<&str>>();
 			let rule = Rule {
 				before: split[0].parse().unwrap(),
@@ -48,7 +48,6 @@ fn main() {
 	let mut followingupdates: Vec<Vec<i32>> = Vec::new();
 	let mut notfollowingupdates: Vec<Vec<i32>> = Vec::new();
 
-	let mut sum = 0;
 	for update in &updates {
 		let mut follows = true;
 		let len = update.len();
@@ -69,14 +68,16 @@ fn main() {
 	let mut sum = 0;
 
 	// part 1
-	// for update in followingupdates {
-	// 	for i in 0..update.len() {
-	// 		if i == (update.len() / 2) {
-	// 			sum += update[i];
-	// 		}
-	// 	}
-	// }
-	// println!("{}", sum);
+	for update in followingupdates {
+		for i in 0..update.len() {
+			if i == (update.len() / 2) {
+				sum += update[i];
+			}
+		}
+	}
+	println!("{}", sum);
+
+	sum = 0;
 
 	// part 2
 	for mut update in notfollowingupdates {
